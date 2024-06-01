@@ -26,7 +26,7 @@
             Teams
           </a>
         </li>
-        <li class="px-4 py-2 hover:bg-gray-200" @click="showModal = true">
+        <li class="px-4 py-2 hover:bg-gray-200" @click="openModal">
           <a href="#" class="flex items-center text-gray-700">
             <i class="fas fa-comments w-5 h-5 mr-2"></i>
             Channels
@@ -53,6 +53,13 @@ export default {
     return {
       showModal: false
     };
+  },
+    methods: {
+      openModal(){
+        this.showModal = true;
+        // set data to state
+        // get data from state
+      }
   }
 };
 </script>

@@ -3,13 +3,15 @@
     <div class="bg-white p-4 pb-8 pt-8 rounded-lg shadow-lg max-w-md mx-auto relative min-w-[450px]" @click.stop>
       <h1 class="text-xl mb-2">Channels</h1>
       <div class="flex flex-col space-y-2 rounded-md">
-        <SearchBar placeholder="Add Channel" @input="debouncedHandleInput" @enter="handleEnter" />
-        <ChannelList 
-          :channels="displayedChannels" 
-          @update:channels="updateChannels" 
-          @dragEnd="onDragEnd" 
-          @remove="removeChannel"
-        />
+        <SearchBar ref="searchBar" placeholder="Add Channel" @input="debouncedHandleInput" @enter="handleEnter" />
+        <div class="max-h-96 overflow-y-auto"> <!-- Add max-height and overflow-y-auto classes -->
+          <ChannelList 
+            :channels="displayedChannels" 
+            @update:channels="updateChannels" 
+            @dragEnd="onDragEnd" 
+            @remove="removeChannel"
+          />
+        </div>
         <div v-if="changesMade" class="flex justify-end space-x-2 mt-4">
           <Button variant="secondary" @click="cancelChanges">Cancel</Button>
           <Button variant="primary" @click="applyChanges">Apply</Button>
@@ -21,13 +23,13 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import SearchBar from '../molecules/SearchBar.vue';
 import ChannelList from '../organisms/ChannelList.vue';
 import Button from '../atoms/Buttons.vue';
 import Toast from '../atoms/Toast.vue';
 import { debounce } from 'lodash';
-import { channelData as initialChannelData } from '../../mock/mock';
+import { useChanneltore } from '@/stores/channel.store';
 
 const ICONS = [
   'fa-solid fa-tv',
@@ -51,12 +53,26 @@ export default {
     Toast
   },
   setup(props, { emit }) {
-    const channelData = ref([...initialChannelData]);
-    const displayedChannels = ref([...initialChannelData]);
+    const channelData = ref([]);
+    const displayedChannels = ref([]);
     const searchQuery = ref('');
     const changesMade = ref(false);
     const toasterMessage = ref('');
     const showToaster = ref(false);
+    const dataStore = useChanneltore();
+
+    const resetChannels = () => {
+      const channelList = dataStore.getChannelData;
+      channelData.value = channelList;
+      displayedChannels.value = channelList;
+    };
+
+    onMounted(() => {
+      if (!dataStore.getChannelData.length) {
+        dataStore.fetchData();
+      }
+      resetChannels();
+    });
 
     const handleBackgroundClick = () => {
       emit('close');
@@ -72,17 +88,18 @@ export default {
 
     const applyChanges = () => {
       changesMade.value = false;
-      toasterMessage.value = 'Channels updated successfully'; 
-      showToaster.value = true; 
+      toasterMessage.value = 'Channels updated successfully';
+      showToaster.value = true;
       setTimeout(() => {
-        showToaster.value = false; 
+        showToaster.value = false;
       }, 2000);
-      console.log('Changes applied:', channelData.value);
+      dataStore.updateChannel(channelData.value);
     };
 
     const cancelChanges = () => {
       displayedChannels.value = [...channelData.value];
       changesMade.value = false;
+      resetChannels();
     };
 
     const handleInput = (input) => {
@@ -99,11 +116,10 @@ export default {
         const newChannel = { channelName: input, channelIcon: randomIcon };
         updateChannelData([...channelData.value, newChannel]);
       } else {
-        displayedChannels.value = channelData.value.filter(channel => 
+        displayedChannels.value = channelData.value.filter(channel =>
           channel.channelName.toLowerCase().includes(normalizedInput)
         );
       }
-      searchQuery.value = ''; // Clear search input after processing
     };
 
     const updateChannels = (updatedChannels) => {
@@ -140,7 +156,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-/* Add any additional styles here */
-</style>
