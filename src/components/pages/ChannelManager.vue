@@ -3,14 +3,13 @@
     <div class="bg-white p-4 pb-8 pt-8 rounded-lg shadow-lg max-w-md mx-auto relative min-w-[450px]" @click.stop>
       <h1 class="text-xl mb-2">Channels</h1>
       <div class="flex flex-col space-y-2 rounded-md">
-        <SearchBar ref="searchBar" placeholder="Add Channel" @input="debouncedHandleInput" @enter="handleEnter" />
-        <div class="max-h-96 overflow-y-auto"> <!-- Add max-height and overflow-y-auto classes -->
-          <ChannelList 
-            :channels="displayedChannels" 
-            @update:channels="updateChannels" 
-            @dragEnd="onDragEnd" 
-            @remove="removeChannel"
-          />
+        <SearchBar ref="searchBar"
+         placeholder="Add Channel"
+            v-model="searchQuery"
+           @enter="handleEnter" />
+        <div class="max-h-96 overflow-y-auto">
+          <ChannelList :channels="displayedChannels" @update:channels="updateChannels" @dragEnd="onDragEnd"
+            @remove="removeChannel" />
         </div>
         <div v-if="changesMade" class="flex justify-end space-x-2 mt-4">
           <Button variant="secondary" @click="cancelChanges">Cancel</Button>
@@ -28,7 +27,6 @@ import SearchBar from '../molecules/SearchBar.vue';
 import ChannelList from '../organisms/ChannelList.vue';
 import Button from '../atoms/Buttons.vue';
 import Toast from '../atoms/Toast.vue';
-import { debounce } from 'lodash';
 import { useChanneltore } from '@/stores/channel.store';
 
 const ICONS = [
@@ -86,10 +84,17 @@ export default {
       updateChannelData(channelData.value.filter(channel => channel.channelName !== channelName));
     };
 
+      const showToast = (message) => {
+    toasterMessage.value = message;
+    showToaster.value = true;
+    setTimeout(() => {
+      showToaster.value = false;
+    }, 2000);
+  };
+
     const applyChanges = () => {
       changesMade.value = false;
-      toasterMessage.value = 'Channels updated successfully';
-      showToaster.value = true;
+      showToast('Channels updated successfully');
       setTimeout(() => {
         showToaster.value = false;
       }, 2000);
@@ -102,12 +107,6 @@ export default {
       resetChannels();
     };
 
-    const handleInput = (input) => {
-      searchQuery.value = input;
-    };
-
-    const debouncedHandleInput = debounce(handleInput, 300);
-
     const handleEnter = (input) => {
       const normalizedInput = input.toLowerCase();
       const match = channelData.value.some(channel => channel.channelName.toLowerCase().includes(normalizedInput));
@@ -115,6 +114,8 @@ export default {
         const randomIcon = ICONS[Math.floor(Math.random() * ICONS.length)];
         const newChannel = { channelName: input, channelIcon: randomIcon };
         updateChannelData([...channelData.value, newChannel]);
+        showToast('New Channel added successfully');
+        searchQuery.value = '';
       } else {
         displayedChannels.value = channelData.value.filter(channel =>
           channel.channelName.toLowerCase().includes(normalizedInput)
@@ -132,9 +133,9 @@ export default {
       changesMade.value = true;
     };
 
-    watch(channelData, () => {
-      changesMade.value = true;
-    });
+    // watch(channelData, () => {
+    //   changesMade.value = true;
+    // });
 
     return {
       channelData,
@@ -145,11 +146,9 @@ export default {
       removeChannel,
       applyChanges,
       cancelChanges,
-      handleInput,
       handleEnter,
       updateChannels,
       changesMade,
-      debouncedHandleInput,
       toasterMessage,
       showToaster
     };
