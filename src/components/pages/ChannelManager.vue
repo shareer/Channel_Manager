@@ -3,13 +3,9 @@
     <div class="bg-white p-4 pb-8 pt-8 rounded-lg shadow-lg max-w-md mx-auto relative min-w-[450px]" @click.stop>
       <h1 class="text-xl mb-2">Channels</h1>
       <div class="flex flex-col space-y-2 rounded-md">
-        <SearchBar ref="searchBar"
-         placeholder="Add Channel"
-            v-model="searchQuery"
-           @enter="handleEnter" />
+        <SearchBar ref="searchBar" placeholder="Add Channel" v-model="searchQuery" @enter="handleEnter" />
         <div class="max-h-96 overflow-y-auto">
-          <ChannelList :channels="displayedChannels" @update:channels="updateChannels" @dragEnd="onDragEnd"
-            @remove="removeChannel" />
+          <ChannelList :channels="displayedChannels" @update:channels="updateChannels" @dragEnd="onDragEnd" @remove="removeChannel" />
         </div>
         <div v-if="changesMade" class="flex justify-end space-x-2 mt-4">
           <Button variant="secondary" @click="cancelChanges">Cancel</Button>
@@ -22,25 +18,13 @@
 </template>
 
 <script>
-import { ref, watch, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import SearchBar from '../molecules/SearchBar.vue';
 import ChannelList from '../organisms/ChannelList.vue';
 import Button from '../atoms/Buttons.vue';
 import Toast from '../atoms/Toast.vue';
 import { useChanneltore } from '@/stores/channel.store';
-
-const ICONS = [
-  'fa-solid fa-tv',
-  'fa-solid fa-radio',
-  'fa-solid fa-music',
-  'fa-solid fa-podcast',
-  'fa-solid fa-film',
-  'fa-solid fa-newspaper',
-  'fa-solid fa-globe',
-  'fa-solid fa-broadcast-tower',
-  'fa-solid fa-camera',
-  'fa-solid fa-headphones'
-];
+import {ICONS} from '../../constants/constants'
 
 export default {
   name: 'ChannelManager',
@@ -84,20 +68,17 @@ export default {
       updateChannelData(channelData.value.filter(channel => channel.channelName !== channelName));
     };
 
-      const showToast = (message) => {
-    toasterMessage.value = message;
-    showToaster.value = true;
-    setTimeout(() => {
-      showToaster.value = false;
-    }, 2000);
-  };
+    const showToast = (message) => {
+      toasterMessage.value = message;
+      showToaster.value = true;
+      setTimeout(() => {
+        showToaster.value = false;
+      }, 2000);
+    };
 
     const applyChanges = () => {
       changesMade.value = false;
       showToast('Channels updated successfully');
-      setTimeout(() => {
-        showToaster.value = false;
-      }, 2000);
       dataStore.updateChannel(channelData.value);
     };
 
@@ -113,7 +94,7 @@ export default {
       if (!match) {
         const randomIcon = ICONS[Math.floor(Math.random() * ICONS.length)];
         const newChannel = { channelName: input, channelIcon: randomIcon };
-        updateChannelData([...channelData.value, newChannel]);
+        updateChannelData([newChannel, ...channelData.value]);
         showToast('New Channel added successfully');
         searchQuery.value = '';
       } else {
@@ -133,24 +114,20 @@ export default {
       changesMade.value = true;
     };
 
-    // watch(channelData, () => {
-    //   changesMade.value = true;
-    // });
-
     return {
       channelData,
       displayedChannels,
       searchQuery,
+      changesMade,
+      toasterMessage,
+      showToaster,
       handleBackgroundClick,
       onDragEnd,
       removeChannel,
       applyChanges,
       cancelChanges,
       handleEnter,
-      updateChannels,
-      changesMade,
-      toasterMessage,
-      showToaster
+      updateChannels
     };
   }
 };
