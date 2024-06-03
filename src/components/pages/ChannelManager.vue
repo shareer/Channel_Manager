@@ -1,6 +1,6 @@
 <template>
-  <div class="fixed inset-0 flex items-center justify-center" @click="handleBackgroundClick">
-    <div class="bg-white p-4 pb-8 pt-8 rounded-lg shadow-lg max-w-md mx-auto relative min-w-[450px]" @click.stop>
+  <div class="fixed inset-0 flex items-center justify-center p-4" @click="handleBackgroundClick">
+    <div class="bg-white p-4 pb-8 pt-8 rounded-lg shadow-lg w-full max-w-md mx-auto relative sm:min-w-[450px]" @click.stop>
       <h1 class="text-xl mb-2">Channels</h1>
       <div class="flex flex-col space-y-2 rounded-md">
         <SearchBar ref="searchBar" placeholder="Add Channel" v-model="searchQuery" @enter="handleEnter" />
@@ -24,7 +24,7 @@ import ChannelList from '../organisms/ChannelList.vue';
 import Button from '../atoms/Buttons.vue';
 import Toast from '../atoms/Toast.vue';
 import { useChanneltore } from '@/stores/channel.store';
-import {ICONS} from '../../constants/constants'
+import { ICONS } from '../../constants/constants';
 
 export default {
   name: 'ChannelManager',
@@ -44,9 +44,9 @@ export default {
     const dataStore = useChanneltore();
 
     const resetChannels = () => {
-      const channelList = dataStore.getChannelData;
-      channelData.value = channelList;
-      displayedChannels.value = channelList;
+      const originalChannelData = [...dataStore.getChannelData];
+      channelData.value = [...originalChannelData];
+      displayedChannels.value = [...originalChannelData];
     };
 
     onMounted(() => {
@@ -89,20 +89,22 @@ export default {
     };
 
     const handleEnter = (input) => {
-      const normalizedInput = input.toLowerCase();
-      const match = channelData.value.some(channel => channel.channelName.toLowerCase().includes(normalizedInput));
-      if (!match) {
-        const randomIcon = ICONS[Math.floor(Math.random() * ICONS.length)];
-        const newChannel = { channelName: input, channelIcon: randomIcon };
-        updateChannelData([newChannel, ...channelData.value]);
-        showToast('New Channel added successfully');
-        searchQuery.value = '';
-      } else {
-        displayedChannels.value = channelData.value.filter(channel =>
-          channel.channelName.toLowerCase().includes(normalizedInput)
-        );
-      }
-    };
+    const normalizedInput = input.trim().toLowerCase();
+    
+    const match = channelData.value.some(channel => channel.channelName.toLowerCase().includes(normalizedInput));
+    if (!match) {
+      const randomIcon = ICONS[Math.floor(Math.random() * ICONS.length)];
+      const newChannel = { channelName: input, channelIcon: randomIcon };
+      updateChannelData([newChannel, ...channelData.value]);
+      showToast('New Channel added successfully');
+      searchQuery.value = '';
+    } else {
+      displayedChannels.value = channelData.value.filter(channel =>
+        channel.channelName.toLowerCase().includes(normalizedInput)
+      );
+    }
+  };
+
 
     const updateChannels = (updatedChannels) => {
       updateChannelData(updatedChannels);
