@@ -7,7 +7,7 @@
       class="bg-white p-4 pb-8 pt-8 rounded-lg shadow-lg w-full max-w-md mx-auto relative sm:min-w-[450px]"
       @click.stop
     >
-      <h1 class="text-xl mb-2">Channels</h1>
+      <h1 class="text-xl mb-2 pb-2">Channels</h1>
       <div class="flex flex-col space-y-2 rounded-md">
         <SearchBar
           ref="searchBar"
