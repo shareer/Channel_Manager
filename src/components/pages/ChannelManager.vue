@@ -1,11 +1,27 @@
 <template>
-  <div class="fixed inset-0 flex items-center justify-center p-4" @click="handleBackgroundClick">
-    <div class="bg-white p-4 pb-8 pt-8 rounded-lg shadow-lg w-full max-w-md mx-auto relative sm:min-w-[450px]" @click.stop>
+  <div
+    class="fixed inset-0 flex items-center justify-center p-4"
+    @click="handleBackgroundClick"
+  >
+    <div
+      class="bg-white p-4 pb-8 pt-8 rounded-lg shadow-lg w-full max-w-md mx-auto relative sm:min-w-[450px]"
+      @click.stop
+    >
       <h1 class="text-xl mb-2">Channels</h1>
       <div class="flex flex-col space-y-2 rounded-md">
-        <SearchBar ref="searchBar" placeholder="Add Channel" v-model="searchQuery" @enter="handleEnter" />
+        <SearchBar
+          ref="searchBar"
+          placeholder="Add Channel"
+          v-model="searchQuery"
+          @enter="handleEnter"
+        />
         <div class="max-h-96 overflow-y-auto">
-          <ChannelList :channels="displayedChannels" @update:channels="updateChannels" @dragEnd="onDragEnd" @remove="removeChannel" />
+          <ChannelList
+            :channels="displayedChannels"
+            @update:channels="updateChannels"
+            @dragEnd="onDragEnd"
+            @remove="removeChannel"
+          />
         </div>
         <div v-if="changesMade" class="flex justify-end space-x-2 mt-4">
           <Button variant="secondary" @click="cancelChanges">Cancel</Button>
@@ -18,28 +34,28 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import SearchBar from '../molecules/SearchBar.vue';
-import ChannelList from '../organisms/ChannelList.vue';
-import Button from '../atoms/Buttons.vue';
-import Toast from '../atoms/Toast.vue';
-import { useChanneltore } from '@/stores/channel.store';
-import { ICONS } from '../../constants/constants';
+import { ref, onMounted } from "vue";
+import SearchBar from "../molecules/SearchBar.vue";
+import ChannelList from "../organisms/ChannelList.vue";
+import Button from "../atoms/Buttons.vue";
+import Toast from "../atoms/Toast.vue";
+import { useChanneltore } from "@/stores/channel.store";
+import { ICONS } from "../../constants/constants";
 
 export default {
-  name: 'ChannelManager',
+  name: "ChannelManager",
   components: {
     SearchBar,
     ChannelList,
     Button,
-    Toast
+    Toast,
   },
   setup(props, { emit }) {
     const channelData = ref([]);
     const displayedChannels = ref([]);
-    const searchQuery = ref('');
+    const searchQuery = ref("");
     const changesMade = ref(false);
-    const toasterMessage = ref('');
+    const toasterMessage = ref("");
     const showToaster = ref(false);
     const dataStore = useChanneltore();
 
@@ -57,7 +73,7 @@ export default {
     });
 
     const handleBackgroundClick = () => {
-      emit('close');
+      emit("close");
     };
 
     const onDragEnd = () => {
@@ -65,7 +81,11 @@ export default {
     };
 
     const removeChannel = (channelName) => {
-      updateChannelData(channelData.value.filter(channel => channel.channelName !== channelName));
+      updateChannelData(
+        channelData.value.filter(
+          (channel) => channel.channelName !== channelName
+        )
+      );
     };
 
     const showToast = (message) => {
@@ -78,7 +98,7 @@ export default {
 
     const applyChanges = () => {
       changesMade.value = false;
-      showToast('Channels updated successfully');
+      showToast("Channels updated successfully");
       dataStore.updateChannel(channelData.value);
     };
 
@@ -89,22 +109,23 @@ export default {
     };
 
     const handleEnter = (input) => {
-    const normalizedInput = input.trim().toLowerCase();
-    
-    const match = channelData.value.some(channel => channel.channelName.toLowerCase().includes(normalizedInput));
-    if (!match) {
-      const randomIcon = ICONS[Math.floor(Math.random() * ICONS.length)];
-      const newChannel = { channelName: input, channelIcon: randomIcon };
-      updateChannelData([newChannel, ...channelData.value]);
-      showToast('New Channel added successfully');
-      searchQuery.value = '';
-    } else {
-      displayedChannels.value = channelData.value.filter(channel =>
+      const normalizedInput = input.trim().toLowerCase();
+
+      const match = channelData.value.some((channel) =>
         channel.channelName.toLowerCase().includes(normalizedInput)
       );
-    }
-  };
-
+      if (!match) {
+        const randomIcon = ICONS[Math.floor(Math.random() * ICONS.length)];
+        const newChannel = { channelName: input, channelIcon: randomIcon };
+        updateChannelData([newChannel, ...channelData.value]);
+        showToast("New Channel added successfully");
+        searchQuery.value = "";
+      } else {
+        displayedChannels.value = channelData.value.filter((channel) =>
+          channel.channelName.toLowerCase().includes(normalizedInput)
+        );
+      }
+    };
 
     const updateChannels = (updatedChannels) => {
       updateChannelData(updatedChannels);
@@ -129,8 +150,8 @@ export default {
       applyChanges,
       cancelChanges,
       handleEnter,
-      updateChannels
+      updateChannels,
     };
-  }
+  },
 };
 </script>
