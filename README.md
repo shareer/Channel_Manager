@@ -1,6 +1,6 @@
 # Channel Manager
 
-This project is a demonstration showcasing the reusable component for managing different channels. This project features a tree structure of checkboxes generated from the provided data. This is developed with Vue 3 in Vite and Tailwind.
+This project is a demonstration showcasing the reusable component for managing different channels. It follows the Atomic design pattern and is developed with Vue 3 in Vite and Tailwind.
 
 ## Development server
 
